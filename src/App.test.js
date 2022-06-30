@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
@@ -50,7 +51,9 @@ test('should be able to type an confirm password', () => {
 test('should show email error message on invalid email', () => {
   render(<App />);
 
-  const emailErrorElement = screen.getByText(/the email you input is invalid/i);
+  const emailErrorElement = screen.queryByText(
+    /the email you input is invalid/i
+  );
 
   const emailInputElement = screen.getByRole('textbox', {
     name: /email/i,
@@ -65,5 +68,67 @@ test('should show email error message on invalid email', () => {
 
   userEvent.click(submitButtonElement);
 
-  expect(emailErrorElement).toBeInTheDocument();
+  const afterEmailErrorElement = screen.queryByText(
+    /the email you input is invalid/i
+  );
+
+  expect(afterEmailErrorElement).toBeInTheDocument();
+});
+
+test('should show password error message on invaild password', () => {
+  render(<App />);
+
+  const passwordErrorElement = screen.queryByText(
+    /The password you entered should contain 5 or more character./i
+  );
+
+  const emailInputElement = screen.getByRole('textbox', {
+    name: /email/i,
+  });
+  const submitButtonElement = screen.getByRole('button', {
+    name: /submit/i,
+  });
+  expect(passwordErrorElement).not.toBeInTheDocument();
+
+  userEvent.type(emailInputElement, 'tmddhks0104@gmail.com');
+  userEvent.click(submitButtonElement);
+
+  const afterPasswordErrorElement = screen.queryByText(
+    /The password you entered should contain 5 or more character./i
+  );
+  expect(afterPasswordErrorElement).toBeInTheDocument();
+});
+test('should show confirm password error message on invaild confirm password', () => {
+  render(<App />);
+
+  const confirmPasswordErrorElement = screen.queryByText(
+      /The passwords don't match. Try again./i
+  );
+
+  const emailInputElement = screen.getByRole('textbox', {
+    name: /email/i,
+  });
+
+  const passwordInputElement =
+      screen.getByLabelText(/password/i);
+
+  const confirmPasswordInputElement =
+      screen.getByLabelText(/confirm password/i);
+
+  const submitButtonElement = screen.getByRole('button', {
+    name: /submit/i,
+  });
+
+  expect(confirmPasswordErrorElement).not.toBeInTheDocument();
+
+  userEvent.type(emailInputElement, 'tmddhks0104@gmail.com');
+  userEvent.type(passwordInputElement, 'password1');
+  userEvent.type(confirmPasswordInputElement, 'password');
+
+  userEvent.click(submitButtonElement);
+
+  const afterConfirmPasswordErrorElement = screen.queryByText(
+      /The password you entered should contain 5 or more character./i
+  );
+  expect(afterConfirmPasswordErrorElement).toBeInTheDocument();
 });
